@@ -1,0 +1,13 @@
+Crypto-Skale-3000/
+│
+├── contracts/
+│   └── Vault.sol
+│
+├── scripts/
+│   ├── deploy.js
+│   └── interact.js
+│
+├── package.json
+├── hardhat.config.js
+├── .env.example
+├── README.md
