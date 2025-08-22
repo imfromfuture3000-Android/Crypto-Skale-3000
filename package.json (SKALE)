@@ -1,0 +1,12 @@
+{
+  "scripts": {
+    "compile": "npx hardhat compile",
+    "clean": "npx hardhat clean",
+    "test": "npx hardhat test",
+    "deploy:skale": "npx hardhat run scripts/deploy.js --network skale",
+    "deploy:base": "npx hardhat run scripts/deploy.js --network base",
+    "verify:skale": "npx hardhat verify --network skale",
+    "verify:base": "npx hardhat verify --network base",
+    "accounts": "npx hardhat accounts"
+  }
+}
