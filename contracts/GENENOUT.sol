@@ -37,6 +37,7 @@ contract GENENOUT {
     mapping(uint256 => Gene) public genes;
     mapping(uint256 => Population) public populations;
     mapping(address => uint256[]) public userGenes;
+    mapping(uint256 => bool) public isOmegaPrime; // Track OMEGA-PRIME achievements
     
     uint256 public currentGeneId;
     uint256 public currentPopulationId;
@@ -148,8 +149,9 @@ contract GENENOUT {
         
         gene.fitness = _fitness;
         
-        // Check if gene achieved OMEGA-PRIME status
-        if (_fitness >= OMEGA_PRIME_THRESHOLD) {
+        // Check if gene achieved OMEGA-PRIME status (only count once)
+        if (_fitness >= OMEGA_PRIME_THRESHOLD && !isOmegaPrime[_geneId]) {
+            isOmegaPrime[_geneId] = true;
             omegaPrimeCount++;
             emit OmegaPrimeAchieved(_geneId, _fitness);
         }
@@ -170,6 +172,7 @@ contract GENENOUT {
         
         for (uint256 i = 0; i < _geneIds.length; i++) {
             require(_geneIds[i] < currentGeneId, "Invalid gene ID");
+            require(genes[_geneIds[i]].isAlive, "Gene must be alive");
             uint256 fitness = genes[_geneIds[i]].fitness;
             totalFitness += fitness;
             if (fitness > maxFit) maxFit = fitness;
@@ -243,18 +246,20 @@ contract GENENOUT {
     }
 
     /**
-     * @dev Internal function for natural selection
+     * @dev Internal function for natural selection using tournament selection
+     * Note: This implementation allows duplicate selections, which is standard
+     * for genetic algorithms to allow fitter individuals higher reproduction rates
      */
     function selectFittest(uint256[] memory _geneIds) internal view returns (uint256[] memory) {
-        // Simple tournament selection
         uint256[] memory selected = new uint256[](_geneIds.length);
+        uint256 baseRandom = _pseudoRandom();
         
         for (uint256 i = 0; i < _geneIds.length; i++) {
-            uint256 tournamentSize = 3;
-            uint256 winner = _geneIds[_pseudoRandom() % _geneIds.length];
+            uint256 tournamentSize = _geneIds.length >= 3 ? 3 : _geneIds.length;
+            uint256 winner = _geneIds[(baseRandom + i) % _geneIds.length];
             
-            for (uint256 j = 1; j < tournamentSize && j < _geneIds.length; j++) {
-                uint256 challenger = _geneIds[_pseudoRandom() % _geneIds.length];
+            for (uint256 j = 1; j < tournamentSize; j++) {
+                uint256 challenger = _geneIds[(baseRandom + i + j) % _geneIds.length];
                 if (genes[challenger].fitness > genes[winner].fitness) {
                     winner = challenger;
                 }
@@ -298,6 +303,10 @@ contract GENENOUT {
 
     function getOmegaPrimeCount() external view returns (uint256) {
         return omegaPrimeCount;
+    }
+
+    function getOmegaPrimeStatus(uint256 _geneId) external view geneExists(_geneId) returns (bool) {
+        return isOmegaPrime[_geneId];
     }
 
     /**
