@@ -1,13 +1,12 @@
-require("@nomiclabs/hardhat-waffle");
-require("@nomiclabs/hardhat-ethers");
-require("dotenv").config();
+require("@nomicfoundation/hardhat-toolbox");
 
 module.exports = {
-  solidity: "0.8.19",
+  solidity: "0.8.20",
   networks: {
     skale: {
-      url: process.env.SKALE_RPC_URL,
-      accounts: [process.env.SKALE_PRIVATE_KEY]
-    }
-  }
+      url: process.env.RPC_URL,
+      chainId: Number(process.env.CHAIN_ID),
+      accounts: [process.env.PRIVATE_KEY],
+    },
+  },
 };
